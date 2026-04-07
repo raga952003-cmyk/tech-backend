@@ -11,14 +11,28 @@ app = FastAPI(
     redoc_url="/api/redoc"
 )
 
-# Start email scheduler on startup (optional - requires apscheduler)
+# Initialize database and start services on startup
 @app.on_event("startup")
 async def startup_event():
+    # Initialize database tables
+    try:
+        from app.database import engine, Base
+        from app.models import User, LearningPath, DailyTask, Quiz, QuizQuestion, QuizAttempt, Interview
+        print("Creating database tables...")
+        Base.metadata.create_all(bind=engine)
+        print("Database tables created successfully!")
+    except Exception as e:
+        print(f"Database initialization error: {e}")
+    
+    # Start email scheduler (optional - requires apscheduler)
     try:
         from app.services.scheduler_service import start_scheduler
         start_scheduler()
+        print("Email scheduler started successfully!")
     except ImportError:
         print("Scheduler not available - install apscheduler to enable email notifications")
+    except Exception as e:
+        print(f"Scheduler error: {e}")
 
 # Stop scheduler on shutdown
 @app.on_event("shutdown")
