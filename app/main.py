@@ -92,3 +92,21 @@ def read_root():
 @app.get("/health")
 def health_check():
     return {"status": "healthy", "service": "TechStudy Tracker API"}
+
+@app.get("/init-db")
+def initialize_database():
+    """Manually initialize database tables"""
+    try:
+        from app.database import engine, Base
+        from app.models import User, LearningPath, DailyTask, Quiz, QuizQuestion, QuizAttempt, Interview
+        Base.metadata.create_all(bind=engine)
+        return {
+            "status": "success",
+            "message": "Database tables created successfully",
+            "tables": ["users", "learning_paths", "daily_tasks", "quizzes", "quiz_questions", "quiz_attempts", "interviews"]
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": str(e)
+        }
